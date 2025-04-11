@@ -1,9 +1,3 @@
---  ___ ___ _ __      _____   ___  ___    ___ ___ ___  _   ___ _  __
--- | __| __| |\ \    / / _ \ / _ \|   \  | _ \ __| _ \/_\ / __| |/ /
--- | _|| _|| |_\ \/\/ / (_) | (_) | |) | |   / _||  _/ _ \ (__| ' < 
--- |_| |___|____\_/\_/ \___/ \___/|___/  |_|_\___|_|/_/ \_\___|_|\_\
-
-
 local AIO = AIO or require("AIO")
 
 -- CLIENT SECRET
@@ -22,8 +16,8 @@ local prices = {}
 
 -- Ready-to-use for the system
 
-local classes = {"Druid", "Hunter", "Mage", "Paladin", "Priest", "Rogue", "Shaman", "Warlock", "Warrior", "MONK", "DEMONHUNTER"};
-local class_list = {"DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR"}
+local classes = {"Warrior", "Paladin", "Hunter", "Rogue", "Priest", "DeathKnight", "Shaman", "Mage", "Warlock", "Druid"};
+local class_list = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "DEATHKNIGHT", "SHAMAN", "MAGE", "WARLOCK", "DRUID"};
 local spell_point_list = {}
 local talent_point_list = {}
 
@@ -31,13 +25,13 @@ local talent_point_list = {}
 --Data
 if AIO.IsServer() then
     --Spells
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\spells.data", "spells")
+    AIO.AddAddon("lua_scripts/ClassLess/data/spells.data", "spells")
     --Talents
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\talents.data", "talents")
+    AIO.AddAddon("lua_scripts/ClassLess/data/talents.data", "talents")
     --Locks
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\locks.data", "locks")
+    AIO.AddAddon("lua_scripts/ClassLess/data/locks.data", "locks")
     --Requirements
-    AIO.AddAddon("lua_scripts\\ClassLess\\data\\req.data", "req")
+    AIO.AddAddon("lua_scripts/ClassLess/data/req.data", "req")
 end
 
 if AIO.AddAddon() then
@@ -558,7 +552,7 @@ end
                     link = gsub(link, "78", nspell)
                 end
                 button.tooltip:SetHyperlink(link)
-                button.tooltip:AddDoubleLine("Current rank", rank .. "/" .. ranks, 1, 1, 1, 1, 1, 1)
+                button.tooltip:AddDoubleLine("当前等级", rank .. "/" .. ranks, 1, 1, 1, 1, 1, 1)
                 if pt[#pt] ~= nil and rank > 0 and ranks > 1 and rank ~= ranks then
                     button.tooltip:AddLine(pt[#pt], nil, nil, nil, true)
                 end
@@ -574,11 +568,11 @@ end
                         button.tooltip:AddLine(lock, c.r, c.g, c.b)
                     end
                     if level ~= nil then
-                        button.tooltip:AddLine("Requires level " .. level, lcolor.r, lcolor.g, lcolor.b)
+                        button.tooltip:AddLine("需要等级 " .. level, lcolor.r, lcolor.g, lcolor.b)
                     end
                     button.tooltip:AddLine(cost, ccolor.r, ccolor.g, ccolor.b)
                 end
-                button.tooltip:AddLine("SPELLID: " .. spell)
+                -- button.tooltip:AddLine("SPELLID: " .. spell)
                 button.tooltip:Show()
             end
         )
@@ -633,7 +627,7 @@ end
             end
         end
 
-        if mode == "spell" then
+        if mode == "技能" then
             spells = db.data.spells[class][spec][4]
             eqt = "false"
             if tCompare(db.spells, spellcheck1) then
@@ -686,7 +680,7 @@ end
             if button:GetAttribute("hrank") == nil or eqt == "true" then
                 button:SetAttribute("hrank", rank)
             end
-			if mode == "spell" then
+			if mode == "技能" then
 				if spell_point_list[class] == nil then
 					spell_point_list[class] = {}
 				end
@@ -736,7 +730,7 @@ end
                     lcolor = RED_FONT_COLOR
                 end
 
-                if mode == "spell" then
+                if mode == "技能" then
                     if ap < nacost or tp < ntcost then
                         state = "disabled"
                         ccolor = RED_FONT_COLOR
@@ -752,7 +746,7 @@ end
                     for h = 1, #db.locks[spell] do
                         if tContains(allspells, db.locks[spell][h]) then
                             state = "disabled"
-                            lock = 'Locked by "' .. ({GetSpellInfo(db.locks[spell][h])})[1] .. '" ' .. mode
+                            lock = '被锁定于 "' .. ({GetSpellInfo(db.locks[spell][h])})[1] .. '" ' .. mode
                             break
                         end
                     end
@@ -762,7 +756,7 @@ end
                     local reqs, reqr = ({GetSpellInfo(db.req[nspell])})[1], ({GetSpellInfo(db.req[nspell])})[2]
                     if not tContains(allspells, db.req[nspell]) then
                         state = "disabled"
-                        req = "req " .. mode .. ' "' .. reqs
+                        req = "需要 " .. mode .. ' "' .. reqs
                         if reqr ~= "" then
                             req = req .. "(" .. reqr .. ')"'
                         else
@@ -776,7 +770,7 @@ end
                 local rreqs, rreqr = ({GetSpellInfo(db.rreq[spell])})[1], ({GetSpellInfo(db.rreq[spell])})[2]
                 if tContains(allspells, db.rreq[spell]) and rank ~= hrank then
                     state = "req"
-                    rreq = "Required for " .. mode .. ' "' .. rreqs
+                    rreq = "需要用于 " .. mode .. ' "' .. rreqs
                     if rreqr ~= "" then
                         rreq = rreq .. "(" .. rreqr .. ')"'
                     else
@@ -804,15 +798,15 @@ end
             button.rank:SetVertexColor(color.r, color.g, color.b)
             button.rank:SetText(rank)
 
-            if mode == "spell" then
-                ncost = "Requires 1 AP"
+            if mode == "技能" then
+                ncost = "需要 1 技能"
                 if ntcost == 1 then
-                    ncost = ncost .. ", 1 TP"
+                    ncost = ncost .. ", 1 天赋"
                 end
             else
-                ncost = "Requires 1 TP"
+                ncost = "需要 1 天赋"
                 if ntcost == 1 then
-                    ncost = ncost .. ", 1 AP"
+                    ncost = ncost .. ", 1 技能"
                 end
             end
 	
@@ -858,7 +852,7 @@ end
 					local ap, tap = GetPoints("ap")
 					local tp, ttp = GetPoints("tp")
                     if key == "LeftButton" then
-                        if (mode == "spell") then
+                        if (mode == "技能") then
 							if(ap > 0 and UnitLevel("player") >= nlevel) then
 								if(ntcost == 1) then
 									if(tp > 0) then
@@ -868,14 +862,14 @@ end
 									TempLearnSpell(nspell, ntcost)
 								end
 							end
-                        else if mode == "talent" and tp >0 and UnitLevel("player") >= nlevel then
+                        else if mode == "天赋" and tp >0 and UnitLevel("player") >= nlevel then
                             TempLearnTalent(nspell, ntcost)
                         end
                     end
 					end
 
                     if key == "RightButton" then
-                        if mode == "spell" then
+                        if mode == "技能" then
                             TempUnlearnSpell(spell, tcost)
                         else
                             TempUnlearnTalent(spell, tcost)
@@ -917,37 +911,6 @@ end
 	
 	AIO.SavePosition(button)
 	
-    --button.flash = CreateFrame("Frame", "CLButtonFlash", button)
-    --button.flash:SetAllPoints()
-    --button.flash:Hide()
-    --local texture = button.flash:CreateTexture()
-   -- texture:SetTexture("Interface\\Cooldown\\star4")
-   -- texture:SetAllPoints()
-   -- texture:SetBlendMode("ADD")
-   -- button.animation = texture:CreateAnimationGroup()
-  --  local a1 = button.animation:CreateAnimation("Scale")
-  --  a1:SetScale(2.5, 2.5)
-  --  a1:SetDuration(3)
-   -- a1:SetSmoothing("OUT")
-
-  --  local a2 = button.animation:CreateAnimation("Rotation")
-  --  a2:SetDegrees(360)
- --   a2:SetDuration(3)
-   -- a2:SetSmoothing("OUT")
-   -- button.animation:SetLooping("BOUNCE")
-   -- button.flash:SetScript(
-   --     "OnShow",
-   --     function()
-   --         button.animation:Play()
-   --     end
-  --  )
-   -- button.flash:SetScript(
-   --     "OnHide",
-   --     function()
-    --        button.animation:Stop()
-    --    end
-   -- )
-
     button.tooltip =
         _G["CLButtontooltip"] or CreateFrame("GameTooltip", "CLButtontooltip", button, "GameTooltipTemplate")
     button:SetScript(
@@ -956,15 +919,13 @@ end
             local ap, tp= GetPoints("ap"), GetPoints("tp")
             button.tooltip:Hide()
             button.tooltip:SetOwner(button, "ANCHOR_RIGHT")
-            button.tooltip:AddLine("Distribute your Ability or Talents Points", nil, nil, nil, true)
+            button.tooltip:AddLine("分配您的技能或天赋点数", nil, nil, nil, true)
             local c = GREEN_FONT_COLOR
             if ap > 0 or tp > 0 then
-                local string =
-                    "You have\n" ..
-                    ap .. " Ability Points\n" .. tp .. " Talent Points"
+                local string = "您拥有" .. ap .. " 点技能点" .. tp .. " 点天赋点"
                 button.tooltip:AddLine(string, c.r, c.g, c.b, true)
             end
-            button.tooltip:AddLine("Drag with right button for move", 1, 1, 1, true)
+            button.tooltip:AddLine("右键拖动以移动", 1, 1, 1, true)
             button.tooltip:Show()
         end
     )
@@ -1017,18 +978,6 @@ end
     frame:RegisterForDrag("LeftButton")
     frame:SetToplevel(true)
 	frame:SetSize(967, 670) -- 420x680
-    --[[frame:SetBackdrop(
-        {
-            bgFile = "Interface\\TutorialFrame\\TutorialFrameBackground",
-            edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-            tile = true,
-            edgeSize = 16,
-            tileSize = 32,
-            insets = {left = 5, right = 5, top = 5, bottom = 5}
-        }
-    )]]
-
-    --FrameBackground(frame, "Interface\\QuestFrame\\UI-QuestLog-Empty")
     frame:SetPoint("CENTER", 0, 0)
     frame:SetScript("OnDragStart", frame.StartMoving)
     frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
@@ -1075,11 +1024,11 @@ end
                 string2 = string2 .. "(" .. tap .. ")"
             end
            -- string = string .. " AP "..icons[1].." " .. tp
-			string2 = string2.." AP         " .. tp
+			string2 = string2.." 技能点         " .. tp
             if ttp > 0 then
                 string2 = string2 .. "(" .. ttp .. ")"
             end
-            string2 = string2 .. " TP "--..icons[2]
+            string2 = string2 .. " 天赋点 "--..icons[2]
             
             if _G["CLMainFramePoints"] ~= nil then
 			--	CLMainFramePoints.text:SetText(string)
@@ -1164,9 +1113,9 @@ end
 	
 
     StaticPopupDialogs["WIPE_SPELLS"] = {
-        text = "Please, confirm resetting ALL your spells and talents",
-        button1 = YES,
-        button2 = NO,
+        text = "请确认重置所有法术和天赋",
+        button1 = "是",
+        button2 = "否",
         OnAccept = function()
             AIO.Handle(handlerName, "WipeAll", clientSecret)
             TabSelect()
@@ -1212,7 +1161,7 @@ end
 	
 
     StaticPopupDialogs["BRUH"] = {
-        text = "This Classless System is presented to you by the Astoria Staff Team!",
+        text = "",
         button1 = THANKS,
         button2 = AWESOME,
         
@@ -1225,7 +1174,7 @@ end
 	
 	
 
-    local buttons = {"Apply", "Reset"}
+    local buttons = {"应用", "重置"}
     for i = 1, #buttons do
         --buttons:
         local button = _G["CLResetButton" .. i] or MakeButton("CLResetButton" .. i, _G["CLResetButtonFrame"])
@@ -1243,9 +1192,9 @@ end
 
     --Learn and reset confirm dialogs
     StaticPopupDialogs["LEARN_CONFIRM"] = {
-        text = "Please, confirm learning.",
-        button1 = "Yes",
-        button2 = "No",
+        text = "请确认学习",
+        button1 = "是",
+        button2 = "否",
         OnAccept = function()
             LearnConfirm("Apply", "true")
         end,
@@ -1256,9 +1205,9 @@ end
     }
 
     StaticPopupDialogs["RESET_CONFIRM"] = {
-        text = "Please, confirm resetting.",
-        button1 = "Yes",
-        button2 = "No",
+        text = "请确认重置",
+        button1 = "是",
+        button2 = "否",
         OnAccept = function()
             LearnConfirm("Reset", "true")
         end,
@@ -1326,16 +1275,16 @@ end
 
 		
 
-  -- frame:SetBackdrop(
-     --   {
-       --     bgFile = "Interface\\TutorialFrame\\TutorialFrameBackground",
-          -- edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-       --     tile = true,
-       --     edgeSize = 16,
-      --      tileSize = 16,
-      --      insets = {left = 0, right = 0, top = 2, bottom = 2}
-     --   }
- --   )
+  frame:SetBackdrop(
+       {
+           bgFile = "Interface\\TutorialFrame\\TutorialFrameBackground",
+          edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+           tile = true,
+           edgeSize = 16,
+           tileSize = 16,
+           insets = {left = 0, right = 0, top = 2, bottom = 2}
+       }
+   )
 
     for index = 1, 2 do
         --Class buttons for spells and talents
@@ -1344,10 +1293,10 @@ end
         local mode
         if index == 1 then
             arr = db.data.spells
-            mode = "spell"
+            mode = "技能"
         else
             arr = db.data.talents
-            mode = "talent"
+            mode = "天赋"
         end
         for k, v in pairsSort(arr) do
             local class, cnum, inum = k, i, index
@@ -1361,7 +1310,7 @@ end
                     nil,
                     unpack(CLASS_ICON_TCOORDS[class])
                 )
-			button:SetPoint("TOPLEFT", 50, - 54 - 60 * i) --beta
+			button:SetPoint("TOPLEFT", 50, - 50 - 55 * i) --beta
             button.text = _G["CLContainer"..index.."SubButton"..i.."Text"] or button:CreateFontString("CLContainer"..index.."SubButton"..i.."Text", "OVERLAY")
 			button.text:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
  			button.text:SetPoint("CENTER", 50, 0)
@@ -1494,78 +1443,6 @@ end
         end
     end --end of index
 
-
-
-    --ClassLess Bars
-    local frame = CLBarsFrame or CreateFrame("Frame", "CLBarsFrame", UIParent)
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
-    frame:SetToplevel(true)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetToplevel(true)
-    --frame:SetSize(172, 104)
-    frame:SetSize(172, 79)
-    frame:SetBackdrop(
-        {
-            bgFile = "",
-            edgeFile = "",
-            tile = true,
-            edgeSize = 16,
-            tileSize = 32,
-            insets = {left = 5, right = 5, top = 5, bottom = 5}
-        }
-    )
-    frame:SetPoint("CENTER", 0, 0)
-    frame:SetScript("OnDragStart", frame.StartMoving)
-    frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-
-	AIO.SavePosition(frame)
-
-    -- local energy={0,1,3,6} -- delete
-    local energy = {1}
-    local colors = {
-        -- [0] = {r = 0, g = 0, b = 255}, -- delete
-        [1] = {r = 255, g = 0, b = 0},
-        -- [3] = {r = 255, g = 255, b = 0} -- delete
-        -- [6]={r=0,g=209,b=255}, -- delete
-    }
-
-    for i = 1, #energy do
-        local e = energy[i]
-        local c = colors[e]
-        local bar = CreateFrame("StatusBar", nil, _G["CLBarsFrame"])
-        bar:SetPoint("TOPLEFT", 8, -20 * (i - 1) - 8)
-        bar:SetWidth(158)
-        bar:SetHeight(20)
-        bar:SetStatusBarTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
-        bar:GetStatusBarTexture():SetHorizTile(false)
-        bar:GetStatusBarTexture():SetVertTile(false)
-        bar:SetStatusBarColor(c.r, c.g, c.b)
-
-        bar.bg = bar:CreateTexture(nil, "BACKGROUND")
-        bar.bg:SetTexture("Interface\\TARGETINGFRAME\\UI-StatusBar")
-        bar.bg:SetAllPoints(true)
-        -- bar.bg:SetVertexColor(181, 255, 235)
-        bar.bg:SetVertexColor(0, 0, 0)
-
-        bar.value = bar:CreateFontString(nil, "OVERLAY")
-        bar.value:SetPoint("CENTER")
-        bar.value:SetFont("Fonts\\FRIZQT__.TTF", 12, "OUTLINE")
-        bar.value:SetJustifyH("CENTER")
-        bar.value:SetShadowOffset(1, -1)
-        bar.value:SetTextColor(1, 1, 1)
-
-        bar:SetScript(
-            "Onupdate",
-            function()
-                local pw = UnitPower("player", e) or 0
-                local pwm = UnitPowerMax("player", e) or 100
-                bar:SetMinMaxValues(0, pwm)
-                bar:SetValue(pw)
-                bar.value:SetText(pw .. "/" .. pwm)
-            end
-        )
-    end
 end --End of Doshit
 
 --Main Execution

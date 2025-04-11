@@ -1,9 +1,3 @@
---  ___ ___ _ __      _____   ___  ___    ___ ___ ___  _   ___ _  __
--- | __| __| |\ \    / / _ \ / _ \|   \  | _ \ __| _ \/_\ / __| |/ /
--- | _|| _|| |_\ \/\/ / (_) | (_) | |) | |   / _||  _/ _ \ (__| ' < 
--- |_| |___|____\_/\_/ \___/ \___/|___/  |_|_\___|_|/_/ \_\___|_|\_\
-
-
 -- SERVER SECRET
 local serverSecret = randomString(128)
 local handlerName = "yQ4CiWjHET"
@@ -246,10 +240,3 @@ function MyHandlers.WipeAll(player, clientSecret)
     player:SaveToDB()
     SendVars(AIO.Msg(), player, true)
 end
-
-
-local function PLAYER_EVENT_ON_SAVE(event, player)
-    player:SendBroadcastMessage("You're saved! :)")
-end
-
--- RegisterPlayerEvent( 25, PLAYER_EVENT_ON_SAVE )
